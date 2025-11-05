@@ -1,0 +1,180 @@
+<main class="min-h-screen grid grid-cols-1 lg:grid-cols-3 gap-4 p-4 lg:p-8 bg-gray-900">
+  <!-- Left Column: Input Form -->
+  <div class="lg:col-span-1 bg-gray-800 rounded-lg p-6 shadow-2xl flex flex-col h-full lg:max-h-[calc(100vh-4rem)]">
+    <div class="flex items-center mb-6">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-indigo-400 mr-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 14 4-4"></path><path d="M3.34 19a10 10 0 1 1 17.32 0"></path></svg>
+      <h1 class="text-2xl font-bold text-white">AI Sociokulturni Brifer</h1>
+    </div>
+    <p class="text-gray-400 mb-8">Unesite podatke o grupi kako biste generirali trenutačno primjenjiv paket za izgradnju odnosa.</p>
+    
+    <form #briefingForm="ngForm" (ngSubmit)="generateBriefing()" class="space-y-6 flex-grow overflow-y-auto pr-2">
+      <div>
+        <label for="zemlja" class="block text-sm font-medium text-gray-300">Zemlja Porijekla</label>
+        <input id="zemlja" name="zemlja" type="text" [(ngModel)]="zemlja" #zemljaModel="ngModel" required class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm py-2 px-3 text-white focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+               [class.border-red-500]="zemljaModel.invalid && (zemljaModel.dirty || zemljaModel.touched)">
+        @if (zemljaModel.invalid && (zemljaModel.dirty || zemljaModel.touched)) {
+          <p class="mt-1 text-sm text-red-400">Polje za zemlju je obavezno.</p>
+        }
+      </div>
+      <div>
+        <label for="grad" class="block text-sm font-medium text-gray-300">Grad Porijekla</label>
+        <input id="grad" name="grad" type="text" [(ngModel)]="grad" #gradModel="ngModel" required class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm py-2 px-3 text-white focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+               [class.border-red-500]="gradModel.invalid && (gradModel.dirty || gradModel.touched)">
+        @if (gradModel.invalid && (gradModel.dirty || gradModel.touched)) {
+          <p class="mt-1 text-sm text-red-400">Polje za grad je obavezno.</p>
+        }
+      </div>
+      <div>
+        <label for="dob" class="block text-sm font-medium text-gray-300">Dobni Raspon</label>
+        <select id="dob" name="dob" [(ngModel)]="dob" class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm py-2 px-3 text-white focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+          @for (age of ageRanges; track age) {
+            <option [value]="age">{{ age }}</option>
+          }
+        </select>
+      </div>
+      <div>
+        <label for="spol" class="block text-sm font-medium text-gray-300">Spolna Struktura</label>
+        <select id="spol" name="spol" [(ngModel)]="spol" class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm py-2 px-3 text-white focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+          @for (gender of genderStructures; track gender) {
+            <option [value]="gender">{{ gender }}</option>
+          }
+        </select>
+      </div>
+      <div>
+        <label for="vrstaTure" class="block text-sm font-medium text-gray-300">Vrsta Ture</label>
+        <select id="vrstaTure" name="vrstaTure" [(ngModel)]="vrstaTure" class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm py-2 px-3 text-white focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+          @for (tour of tourTypes; track tour) {
+            <option [value]="tour">{{ tour }}</option>
+          }
+        </select>
+      </div>
+      
+      <div class="pt-4">
+        <button type="submit" [disabled]="isLoading() || briefingForm.invalid" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+          @if (isLoading()) {
+            <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <span>Generiranje...</span>
+          } @else {
+            <span>Generiraj Brifing</span>
+          }
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Right Column: Results -->
+  <div class="lg:col-span-2 bg-gray-800 rounded-lg p-6 shadow-2xl overflow-y-auto h-full lg:max-h-[calc(100vh-4rem)]">
+    @if (isLoading()) {
+      <div class="flex items-center justify-center h-full">
+        <div class="text-center">
+            <svg class="animate-spin mx-auto h-12 w-12 text-indigo-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <p class="mt-4 text-lg font-semibold text-gray-300">AI analizira podatke...</p>
+            <p class="text-gray-400">Pripremam sociokulturni brifing za vas.</p>
+        </div>
+      </div>
+    } @else if (error(); as errorMessage) {
+      <div class="flex items-center justify-center h-full">
+        <div class="text-center bg-red-900/50 border border-red-700 p-6 rounded-lg">
+          <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-12 w-12 text-red-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+          <p class="mt-4 text-lg font-semibold text-red-300">Došlo je do pogreške</p>
+          <p class="text-red-400">{{ errorMessage }}</p>
+        </div>
+      </div>
+    } @else if (briefingResult(); as briefing) {
+      <div>
+        <div class="flex justify-between items-center mb-6">
+          <h2 class="text-3xl font-bold text-white">Sociokulturni Brifing</h2>
+          <button (click)="exportAsPDF()" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-indigo-500 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path d="M10.75 2.75a.75.75 0 00-1.5 0v8.614L6.295 8.235a.75.75 0 10-1.09 1.03l4.25 4.5a.75.75 0 001.09 0l4.25-4.5a.75.75 0 00-1.09-1.03l-2.955 3.129V2.75z"></path><path d="M3.5 12.75a.75.75 0 00-1.5 0v2.5A2.75 2.75 0 004.75 18h10.5A2.75 2.75 0 0018 15.25v-2.5a.75.75 0 00-1.5 0v2.5c0 .69-.56 1.25-1.25 1.25H4.75c-.69 0-1.25-.56-1.25-1.25v-2.5z"></path></svg>
+            <span>Izvezi kao PDF</span>
+          </button>
+        </div>
+        <div id="pdfContent" class="space-y-6">
+          <!-- Briefing Parameters -->
+          <div class="bg-gray-900/50 p-5 rounded-lg border border-gray-700">
+            <h3 class="text-xl font-semibold text-indigo-300 mb-4">Parametri Brifinga</h3>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm">
+                <div><strong class="text-gray-400">Zemlja:</strong> <span class="text-gray-200">{{ briefingForm.value.zemlja }}</span></div>
+                <div><strong class="text-gray-400">Grad:</strong> <span class="text-gray-200">{{ briefingForm.value.grad }}</span></div>
+                <div><strong class="text-gray-400">Dob:</strong> <span class="text-gray-200">{{ briefingForm.value.dob }}</span></div>
+                <div><strong class="text-gray-400">Spol:</strong> <span class="text-gray-200">{{ briefingForm.value.spol }}</span></div>
+                <div class="col-span-2 sm:col-span-1"><strong class="text-gray-400">Vrsta Ture:</strong> <span class="text-gray-200">{{ briefingForm.value.vrstaTure }}</span></div>
+            </div>
+          </div>
+          <!-- Jezični Starteri -->
+          <div class="bg-gray-900/50 p-5 rounded-lg border border-gray-700">
+            <h2 class="text-xl font-semibold text-indigo-300 mb-4">Jezični Starteri</h2>
+            <ul class="space-y-3">
+              @for(item of briefing.Rapport_Jezicni_Starteri; track item.fraza) {
+                <li class="p-3 bg-gray-800 rounded-md">
+                  <p class="text-lg text-white">"{{ item.fraza }}" <span class="text-sm font-mono text-cyan-400 ml-2">[{{ item.tip }}]</span></p>
+                  <p class="text-gray-400 text-sm">Fonetski: <span class="italic">{{ item.fonetski }}</span></p>
+                </li>
+              }
+            </ul>
+          </div>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Kulturni Quick Wins -->
+            <div class="bg-gray-900/50 p-5 rounded-lg border border-gray-700">
+              <h2 class="text-xl font-semibold text-indigo-300 mb-4">Kulturni Quick Wins</h2>
+              <ul class="space-y-2">
+                @for(item of briefing.Kulturni_QuickWins; track $index) {
+                  <li><strong class="font-medium text-gray-300">{{ item.kategorija }}:</strong> <span class="text-white">{{ item.vrijednost }}</span></li>
+                }
+              </ul>
+            </div>
+
+            <!-- Psihološki Ponos -->
+            <div class="bg-gray-900/50 p-5 rounded-lg border border-gray-700">
+              <h2 class="text-xl font-semibold text-indigo-300 mb-4">Psihološki Ponos</h2>
+              <ul class="space-y-2">
+                @for(item of briefing.Psiholoski_Ponos; track $index) {
+                  <li><strong class="font-medium text-gray-300">{{ item.kategorija }}:</strong> <span class="text-white">{{ item.vrijednost }}</span></li>
+                }
+              </ul>
+            </div>
+          </div>
+
+          <!-- Grupne Karakteristike & Logističke Taktike -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-gray-900/50 p-5 rounded-lg border border-gray-700">
+              <h2 class="text-xl font-semibold text-indigo-300 mb-4">Grupne Karakteristike</h2>
+              <ul class="list-disc list-inside space-y-2 text-gray-300">
+                @for(item of briefing.Grupne_Karakteristike; track item) { <li>{{ item }}</li> }
+              </ul>
+            </div>
+            <div class="bg-gray-900/50 p-5 rounded-lg border border-gray-700">
+              <h2 class="text-xl font-semibold text-indigo-300 mb-4">Logističke Taktike</h2>
+              <ul class="list-disc list-inside space-y-2 text-gray-300">
+                @for(item of briefing.Logisticke_Taktike; track item) { <li>{{ item }}</li> }
+              </ul>
+            </div>
+          </div>
+
+          <!-- Tabu Osjetljivosti -->
+          <div class="bg-red-900/40 p-5 rounded-lg border border-red-700">
+            <h2 class="text-xl font-semibold text-red-300 mb-4">Tabu Osjetljivosti (Teme za izbjegavanje)</h2>
+            <ul class="list-disc list-inside space-y-2 text-red-300">
+               @for(item of briefing.Tabu_Osjetljivosti; track item) { <li>{{ item }}</li> }
+            </ul>
+          </div>
+        </div>
+      </div>
+    } @else {
+      <div class="flex items-center justify-center h-full">
+        <div class="text-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-16 w-16 text-gray-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 12v.01"></path><path d="M20 12v.01"></path><path d="M4 12v.01"></path><path d="M12 20v.01"></path><path d="M20 20v.01"></path><path d="M4 20v.01"></path><path d="M12 4v.01"></path><path d="M20 4v.01"></path><path d="M4 4v.01"></path></svg>
+            <p class="mt-4 text-xl font-semibold text-gray-400">Vaš brifing će se pojaviti ovdje.</p>
+            <p class="text-gray-500">Ispunite obrazac i kliknite "Generiraj" za početak.</p>
+        </div>
+      </div>
+    }
+  </div>
+</main>
